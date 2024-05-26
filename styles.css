@@ -432,6 +432,7 @@ a {
                     height: 35px;
                 }
                 span {
+                    color: var(--black-color);
                     font: bold 1rem var(--primary-font);
                 }
             }
@@ -482,9 +483,6 @@ footer {
             display: block;
             img {
                 width: 100%;
-            }
-            span {
-                color: var(--black-color);
             }
         }
     }
