@@ -89,7 +89,7 @@ a {
                     align-items: center;
     
                     cursor: pointer;
-    
+
                     &:hover {
                         color: var(--blue-color);
                     }
@@ -100,6 +100,7 @@ a {
                     }
     
                     span {
+                        color: var(--black-color);
                         font: bold 1rem var(--primary-font);
                     }
                 }
@@ -474,14 +475,17 @@ footer {
         z-index: 3;
 
         .close {
-          width: 50px;
-          position: absolute;
-          top: 0;
-          right: 0;
-          display: block;
-              img {
+            width: 50px;
+            position: absolute;
+            top: 0;
+            right: 0;
+            display: block;
+            img {
                 width: 100%;
-              }
+            }
+            span {
+                color: var(--black-color);
+            }
         }
     }
     .footer-menu-mobile {
