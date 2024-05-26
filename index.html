@@ -126,6 +126,9 @@
 
         <div class="body">
             <nav class="trees">
+                <button class="close">
+                  <img src="./icons/close.png">
+                </button>
 
                 <header>
                     <span>Content Tree</span>
@@ -9383,6 +9386,11 @@ time_traveler2.contemplate_time_travel_dilemma(<span class="green">"a critical U
             </main>
             
             <aside class="headings">
+                
+                <button class="close">
+                  <img src="./icons/close.png">
+                </button>
+
                 <section data-reaction="topic-1-section-1-page-1" class="active">
                     <span>On this page</span>
                     <ul>
@@ -11602,6 +11610,23 @@ time_traveler2.contemplate_time_travel_dilemma(<span class="green">"a critical U
             </aside>
         </div>
 
+        <div class="footer-menu-mobile">
+          <ul class="content-footer">
+            <li>
+              <button class="content-tree-button">
+                <img src="./icons/tree.png">
+                <span>Content Tree</span>
+              </button>
+            </li>
+            <li>
+              <button class="on-this-page-button">
+                <img src="./icons/content.png">
+                <span>On this page</span>
+              </button>
+            </li>
+          </ul>
+        </div>
+
         <footer></footer>
 
         <!-- <script src="./forFCCCertificationEdit.js"></script> -->
@@ -11640,20 +11665,32 @@ time_traveler2.contemplate_time_travel_dilemma(<span class="green">"a critical U
 
                 const activeHeadingByReaction = action => {
                     const heading = headings.querySelector(`.active [data-action="${action}"]`)
+                    if (!heading) return
                     active(heading)
                 }
 
                 const hs = [...pages.querySelectorAll('section [data-reaction]:not([data-reaction=""]')]
-                let actual = 0
+                let activeHs = 0
                 const headingsObserverCallback = (entries) => {
-                    const entry = entries[0]
-                    const targetIndex = hs.indexOf(entry.target)
-
-                    if (Math.abs(targetIndex - actual) === 1) {
+                  entries.forEach(entry => {
+                    const actualIndex = hs.indexOf(entry.target)
+                    const activeHss = pages.querySelectorAll('.active [data-reaction]:not([data-reaction=""]')
+                    const maxIndex = hs.indexOf(activeHss[activeHss.length - 1])
+                    if (actualIndex < 0) return
+                    if (entry.isIntersecting) {
+                      if (actualIndex < activeHs) {
+                        activeHs = actualIndex
                         inactiveActiveHeading()
-                        actual = targetIndex
-                        activeHeadingByReaction(entry.target.dataset.reaction)
+                        activeHeadingByReaction(hs[activeHs].dataset.reaction)
+                      }
+                    } else {
+                      if (actualIndex <= activeHs && activeHs + 1 <= maxIndex) {
+                        activeHs++
+                        inactiveActiveHeading()
+                        activeHeadingByReaction(hs[activeHs].dataset.reaction)
+                      }
                     }
+                  }) 
                 }
 
                 const headingsObserver = new IntersectionObserver(headingsObserverCallback);
@@ -11715,6 +11752,7 @@ time_traveler2.contemplate_time_travel_dilemma(<span class="green">"a critical U
 
                     const fstButton = tree.querySelector('button') || tree.querySelector('a')
                     active(fstButton)
+                    activePage({pageButton: fstButton})
                 }
 
                 const sectionButtons = document.querySelectorAll('.sections > li > button')
@@ -11779,9 +11817,6 @@ time_traveler2.contemplate_time_travel_dilemma(<span class="green">"a critical U
                 const activePageByAction = action => {
                     const page = document.querySelector(`.pages [data-reaction="${action}"]`)
                     active(page)
-
-                    const fst = page.querySelector('section [data-reaction]:not([data-reaction=""]')
-                    actual = hs.indexOf(fst)
                 }
 
                 const activeHeadingsByAction = action => {
@@ -11790,36 +11825,47 @@ time_traveler2.contemplate_time_travel_dilemma(<span class="green">"a critical U
 
                     const fstButton = heading.querySelector('button')
                     active(fstButton)
-                }
+                    
+                    activeHs = hs.indexOf(document.querySelector(`[data-reaction="${fstButton.dataset.action}"]`))
+                  }
 
                 const goToTop = () => {
                     document.body.scrollTop = 0;
                     document.documentElement.scrollTop = 0;
                 }
 
-                const treeButtons = [...document.querySelectorAll('.trees button'), ...document.querySelectorAll('.trees a')]
+                const activePage = ({pageButton}) => {
+                    const action = pageButton.dataset.action
+
+                    inactiveActiveTreeButton()
+                    activePageButton(pageButton)
+                    
+                    inactiveActivePages()
+                    activePageByAction(action)
+                    
+                    inactiveActiveHeadings()
+                    activeHeadingsByAction(action)
+
+                    closeMenus()
+                    goToTop()
+                }
+
+                const treeButtons = [...document.querySelectorAll('.trees button:not(.close)'), ...document.querySelectorAll('.trees a:not(.close)')]
                 treeButtons.forEach(treeButton => {
                     treeButton.addEventListener('click', e => {
                         const actualPageButton = e.currentTarget
-                        const action = e.currentTarget.dataset.action
-
-                        inactiveActiveTreeButton()
-                        activePageButton(actualPageButton)
-                        
-                        inactiveActivePages()
-                        activePageByAction(action)
-                        
-                        inactiveActiveHeadings()
-                        activeHeadingsByAction(action)
-
-                        goToTop()
+                        activePage({pageButton: actualPageButton})
                     })
                 })
 
                 // Headings
                 const goToContentByAction = action => {
                     const content = document.querySelector(`.pages [data-reaction="${action}"]`)
-                    content.scrollIntoView()
+
+                    const yOffset = -110; 
+                    const y = content.getBoundingClientRect().top + window.pageYOffset + yOffset;
+
+                    window.scrollTo({top: y, behavior: 'smooth'});
                 }
 
                 const applyAnimationByAction = (action, animationClass) => {
@@ -11830,15 +11876,56 @@ time_traveler2.contemplate_time_travel_dilemma(<span class="green">"a critical U
                     }, 1000)
                 }
 
-                const headingsButtons = document.querySelectorAll('.headings button')
-                headingsButtons.forEach(headingsButton => {
-                    headingsButton.addEventListener('click', e => {                        
+                const closeButtons = document.querySelectorAll('.close')
+                const mediaQuery = window.matchMedia("(max-width: 65rem)")
+                const closeMenus = () => {
+                    if (mediaQuery.matches) {
+                        showingTree = false
+                        showingOnThisPage = false
 
+                        headings.style.display = 'none'
+                        trees.style.display = 'none'
+                    }
+                }
+
+                const headingsButtons = document.querySelectorAll('.headings button:not(.close)')
+                headingsButtons.forEach(headingsButton => {
+                    headingsButton.addEventListener('click', e => {
                         const action = e.currentTarget.dataset.action
                         goToContentByAction(action)
+                        closeMenus()
                         applyAnimationByAction(action, 'go-to-animation')
                     })
                 })
+
+                // Bottom Bar
+                const contentTreeButton = document.querySelector('.content-tree-button')
+                const onThisPageButton = document.querySelector('.on-this-page-button')
+                const trees = document.querySelector('.trees')
+
+                let showingTree = false
+                let showingOnThisPage = false
+                
+                closeButtons.forEach(closeButton => {
+                  closeButton.addEventListener('click', closeMenus)
+                })
+
+                contentTreeButton.addEventListener('click', () => {
+                    headings.style.display = 'none'
+                    showingOnThisPage = false
+
+                    trees.style.display = showingTree ? 'none' : 'block'
+                    showingTree = !showingTree
+                })
+
+                onThisPageButton.addEventListener('click', () => {
+                    trees.style.display = 'none'
+                    showingTree = false
+
+                    headings.style.display = showingOnThisPage ? 'none' : 'block'
+                    showingOnThisPage = !showingOnThisPage
+                })
+
             }
         </script>
     </body>
