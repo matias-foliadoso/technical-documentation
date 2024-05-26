@@ -226,11 +226,13 @@ sections.forEach(section => {
 const trees = document.querySelector('.trees')
 trees.setAttribute('id', 'navbar')
 
-const treesButtons = trees.querySelectorAll('button')
+const treesButtons = trees.querySelectorAll('button:not(.close)')
 treesButtons.forEach(treeButton => {
     const a = document.createElement('a')
     a.classList = treeButton.classList
     a.classList.add('nav-link')
+
+    console.log('here', treeButton.dataset.action)
 
     const section = document.querySelector(`[data-reaction="${treeButton.dataset.action}"]`)
     a.setAttribute('href', `#${section.getAttribute('id')}`)
