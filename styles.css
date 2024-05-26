@@ -129,6 +129,7 @@ a {
                         padding: .5rem;
                         color: var(--white-color);
                         cursor: pointer;
+                        text-align: start;
                         &:hover {
                             text-decoration: underline;
                         }
@@ -454,6 +455,19 @@ footer {
         .content-header {
             .logo {
               display: none;
+            }
+            .topics {
+                > li {
+                    position: static;
+                    .sections {
+                        width: 100vw;
+                        position: absolute;
+                        left: 0;
+                        button {
+                            min-height: 50px;
+                        }
+                    }
+                }
             }
         }
     }
